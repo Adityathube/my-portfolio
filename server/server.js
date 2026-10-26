@@ -6,9 +6,14 @@ import cors from 'cors'
 dotenv.config()
 
 const app = express()
-const PORT = 3001
+const PORT = process.env.PORT || 3001
 
-app.use(cors({ origin: 'http://localhost:5173' }))
+app.use(cors({
+  origin: [
+    'http://localhost:5173',
+    'https://YOUR-VERCEL-DOMAIN.vercel.app',
+  ],
+}))
 app.use(express.json({ limit: '20kb' }))
 
 app.post('/api/chat', async (req, res) => {
@@ -28,7 +33,7 @@ app.post('/api/chat', async (req, res) => {
       headers: {
         Authorization: `Bearer ${process.env.OPENROUTER_API_KEY}`,
         'Content-Type': 'application/json',
-        'HTTP-Referer': 'http://localhost:5173',
+        'HTTP-Referer': process.env.SITE_URL || 'http://localhost:5173',
         'X-Title': 'Aditya Thube Portfolio',
       },
       body: JSON.stringify({
@@ -80,7 +85,7 @@ Keep answers friendly and focused on the visitor's question.`,
   }
 })
 
-app.listen(PORT, () => {
-  console.log(`Portfolio AI backend running at http://localhost:${PORT}`)
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Portfolio AI backend running on port ${PORT}`)
 })
 
