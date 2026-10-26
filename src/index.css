@@ -1,0 +1,23 @@
+@import "tailwindcss";
+
+@theme {
+  --color-background: #0f1418;
+  --color-foreground: #f0f2f5;
+  --color-primary: #20b2a6;
+  --color-muted: #7a8491;
+  --color-panel: #141a1f;
+  --color-border: #242b32;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background: #0f1418;
+  color: #f0f2f5;
+  font-family: Inter, system-ui, sans-serif;
+}
