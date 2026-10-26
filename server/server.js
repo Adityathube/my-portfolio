@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3001
 app.use(cors({
   origin: [
     'http://localhost:5173',
-    'https://YOUR-VERCEL-DOMAIN.vercel.app',
+    'https://my-portfolio-six-tau-80.vercel.app',
   ],
 }))
 app.use(express.json({ limit: '20kb' }))
