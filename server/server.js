@@ -8,12 +8,24 @@ dotenv.config()
 const app = express()
 const PORT = process.env.PORT || 3001
 
+
+const allowedOrigins = [
+  'http://localhost:5173',
+  'https://my-portfolio-six-tau-80.vercel.app',
+]
+
 app.use(cors({
-  origin: [
-    'http://localhost:5173',
-    'https://my-portfolio-six-tau-80.vercel.app',
-  ],
+  origin: (origin, callback) => {
+    if (!origin || allowedOrigins.includes(origin)) {
+      return callback(null, true)
+    }
+
+    return callback(new Error('Origin not allowed by CORS'))
+  },
+  methods: ['GET', 'POST', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }))
+
 app.use(express.json({ limit: '20kb' }))
 
 app.post('/api/chat', async (req, res) => {
