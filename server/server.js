@@ -98,6 +98,85 @@ Keep answers friendly and focused on the visitor's question.`,
   }
 })
 
+app.post('/api/contact', async (req, res) => {
+  try {
+    const { name, email, subject, message } = req.body
+
+    if (
+      typeof name !== 'string' ||
+      typeof email !== 'string' ||
+      typeof subject !== 'string' ||
+      typeof message !== 'string' ||
+      !name.trim() ||
+      !email.trim() ||
+      !subject.trim() ||
+      !message.trim()
+    ) {
+      return res.status(400).json({
+        error: 'Please fill in all fields.',
+      })
+    }
+
+    if (
+      name.length > 100 ||
+      email.length > 254 ||
+      subject.length > 200 ||
+      message.length > 5000
+    ) {
+      return res.status(400).json({
+        error: 'One or more fields are too long.',
+      })
+    }
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim())) {
+      return res.status(400).json({
+        error: 'Please enter a valid email address.',
+      })
+    }
+
+    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+      return res.status(500).json({
+        error: 'Contact email service is not configured yet.',
+      })
+    }
+
+    const nodemailer = (await import('nodemailer')).default
+
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.GMAIL_USER,
+        pass: process.env.GMAIL_APP_PASSWORD,
+      },
+    })
+
+    await transporter.sendMail({
+      from: process.env.GMAIL_USER,
+      to: process.env.GMAIL_USER,
+      replyTo: email.trim(),
+      subject: `Portfolio Contact: ${subject.trim()}`,
+      text: [
+        `Name: ${name.trim()}`,
+        `Email: ${email.trim()}`,
+        `Subject: ${subject.trim()}`,
+        '',
+        'Message:',
+        message.trim(),
+      ].join('\n'),
+    })
+
+    return res.json({
+      success: true,
+      message: 'Your message has been sent successfully!',
+    })
+  } catch (error) {
+    console.error('Contact form error:', error)
+    return res.status(500).json({
+      error: 'Unable to send your message right now. Please try again later.',
+    })
+  }
+})
+
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Portfolio AI backend running on port ${PORT}`)
 })

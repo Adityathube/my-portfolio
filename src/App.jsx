@@ -1196,21 +1196,55 @@ function ContactSection() {
     },
   ]
 
-  function handleSubmit(event) {
+    
+  async function handleSubmit(event) {
     event.preventDefault()
 
     const form = event.currentTarget
     const data = new FormData(form)
-    const name = data.get('name')
-    const email = data.get('email')
-    const subject = data.get('subject') || 'Portfolio contact'
-    const message = data.get('message')
 
-    const body = `Name: ${name}\nEmail: ${email}\n\n${message}`
-    const mailto = `mailto:adityathube1901@gmail.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`
+    const contact = {
+      name: data.get('name'),
+      email: data.get('email'),
+      subject: data.get('subject'),
+      message: data.get('message'),
+    }
 
-    window.location.href = mailto
+    const submitButton = form.querySelector('button[type="submit"]')
+    const originalButtonText = submitButton.textContent
+
+    submitButton.disabled = true
+    submitButton.textContent = 'Sending...'
+
+    try {
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/contact`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(contact),
+        }
+      )
+
+      const result = await response.json()
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Could not send your message.')
+      }
+
+      alert('Message sent successfully! Thank you for contacting me.')
+      form.reset()
+    } catch (error) {
+      console.error('Contact form error:', error)
+      alert(error.message || 'Could not send your message. Please try again.')
+    } finally {
+      submitButton.disabled = false
+      submitButton.textContent = originalButtonText
+    }
   }
+
 
   return (
     <section className="contact-content">
