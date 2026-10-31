@@ -1563,6 +1563,7 @@ function App() {
   const [assistantOpen, setAssistantOpen] = useState(true)
   const [activeSidebar, setActiveSidebar] = useState('explorer')
   const [repoExpanded, setRepoExpanded] = useState(false)
+  const [portfolioRepoExpanded, setPortfolioRepoExpanded] = useState(false)
 
 const [expandedFolders, setExpandedFolders] = useState({
   portfolio: true,
@@ -1720,7 +1721,6 @@ const toggleFolder = (folder) => {
             <button className="activity-icon" title="Settings" aria-label="Settings"><VscSettingsGear size={20} /></button>
           </div>
         </aside>
-
         {/* Sidebar: Explorer or Source Control */}
         {activeSidebar === 'source-control' ? (
           <aside className="explorer source-control-panel">
@@ -1773,6 +1773,85 @@ const toggleFolder = (folder) => {
                 </div>
               </div>
             )}
+
+              <button
+                type="button"
+                className="source-control-repo-toggle"
+                onClick={() => setPortfolioRepoExpanded(!portfolioRepoExpanded)}
+                aria-expanded={portfolioRepoExpanded}
+              >
+                <span className="source-control-chevron">
+                  {portfolioRepoExpanded ? '⌄' : '›'}
+                </span>
+                <span className="source-control-git-icon">◆</span>
+                <span className="source-control-repo-name">my-portfolio</span>
+              </button>
+
+              {portfolioRepoExpanded && (
+                <div className="source-control-repo-details">
+                  <a
+                    className="source-control-primary-link"
+                    href="https://github.com/Adityathube/my-portfolio"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span>↗</span> Open repository on GitHub
+                  </a>
+
+                  <div className="source-control-section-title source-control-links-heading">
+                    <span>⌄</span> REPOSITORY LINKS
+                  </div>
+
+                  <a
+                    className="source-control-link"
+                    href="https://github.com/Adityathube/my-portfolio/commits/main/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span className="source-control-link-icon">◷</span>
+                    <span><strong>Commit history</strong><small>View actual commits on GitHub</small></span>
+                    <span className="source-control-external">↗</span>
+                  </a>
+
+                  <a
+                    className="source-control-link"
+                    href="https://github.com/Adityathube/my-portfolio/issues"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span className="source-control-link-icon">⊙</span>
+                    <span><strong>Issues</strong><small>Repository issues</small></span>
+                    <span className="source-control-external">↗</span>
+                  </a>
+
+                  <a
+                    className="source-control-link"
+                    href="https://github.com/Adityathube/my-portfolio/pulls"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span className="source-control-link-icon">⑂</span>
+                    <span><strong>Pull requests</strong><small>Review proposed changes</small></span>
+                    <span className="source-control-external">↗</span>
+                  </a>
+
+                  <a
+                    className="source-control-link"
+                    href="https://github.com/Adityathube/my-portfolio/blob/main/README.md"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <span className="source-control-link-icon">MD</span>
+                    <span><strong>README.md</strong><small>Project documentation</small></span>
+                    <span className="source-control-external">↗</span>
+                  </a>
+
+                  <div className="source-control-note">
+                    <span>ⓘ</span> Repository activity opens on GitHub; this panel does not display invented history.
+                  </div>
+                </div>
+              )}
+
           </aside>
         ) : activeSidebar === 'explorer' ? (
           <aside className="explorer">
