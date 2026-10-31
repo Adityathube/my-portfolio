@@ -1,23 +1,371 @@
 @import "tailwindcss";
 
+/* ========================================
+   TAILWIND THEME TOKENS
+======================================== */
 @theme {
-  --color-background: #0f1418;
-  --color-foreground: #f0f2f5;
-  --color-primary: #20b2a6;
-  --color-muted: #7a8491;
-  --color-panel: #141a1f;
-  --color-border: #242b32;
+  --color-background: #272822;
+  --color-foreground: #f8f8f2;
+  --color-primary: #e5a50a;
+  --color-muted: #a59f85;
+  --color-panel: #1e1f1c;
+  --color-border: #49483e;
 }
 
-html {
+/* ========================================
+   GLOBAL THEME SYSTEM
+   Monokai is the default; other themes remain selectable.
+======================================== */
+:root {
   color-scheme: dark;
+  --color-background: #272822;
+  --color-foreground: #f8f8f2;
+  --color-panel: #1e1f1c;
+  --color-muted: #a59f85;
+  --color-border: #49483e;
+  --color-primary: #e5a50a;
+  --editor-font-size: 15px;
+  --editor-zoom: 1.0714;
+}
+
+:root[data-theme="monokai"] {
+  color-scheme: dark;
+  --color-background: #272822;
+  --color-foreground: #f8f8f2;
+  --color-panel: #1e1f1c;
+  --color-muted: #a59f85;
+  --color-border: #49483e;
+  --color-primary: #e5a50a;
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-background: #0f1418;
+  --color-foreground: #f0f2f5;
+  --color-panel: #141a1f;
+  --color-muted: #7a8491;
+  --color-border: #242b32;
+  --color-primary: #20b2a6;
+}
+
+:root[data-theme="light"] {
+  color-scheme: light;
+  --color-background: #f5f7fa;
+  --color-foreground: #202938;
+  --color-panel: #ffffff;
+  --color-muted: #657184;
+  --color-border: #dce2e9;
+  --color-primary: #087f78;
+}
+
+:root[data-theme="dracula"] {
+  color-scheme: dark;
+  --color-background: #282a36;
+  --color-foreground: #f8f8f2;
+  --color-panel: #21222c;
+  --color-muted: #a6a6b5;
+  --color-border: #44475a;
+  --color-primary: #bd93f9;
+}
+
+:root[data-theme="nord"] {
+  color-scheme: dark;
+  --color-background: #2e3440;
+  --color-foreground: #eceff4;
+  --color-panel: #272e3a;
+  --color-muted: #9aa7ba;
+  --color-border: #434c5e;
+  --color-primary: #88c0d0;
+}
+
+/* ========================================
+   GLOBAL BASE STYLES
+======================================== */
+* { box-sizing: border-box; }
+
+html, body, #root {
+  min-width: 320px;
+  min-height: 100%;
+  margin: 0;
+  background: var(--color-background);
+  color: var(--color-foreground);
 }
 
 body {
-  margin: 0;
-  min-width: 320px;
   min-height: 100vh;
-  background: #0f1418;
-  color: #f0f2f5;
   font-family: Inter, system-ui, sans-serif;
+}
+
+button, input, textarea, select { font: inherit; }
+button, a { -webkit-tap-highlight-color: transparent; }
+
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ========================================
+   THEME VARIABLE BRIDGE
+======================================== */
+:root,
+:root[data-theme] {
+  --background: var(--color-background);
+  --foreground: var(--color-foreground);
+  --panel: var(--color-panel);
+  --border: var(--color-border);
+  --muted: var(--color-muted);
+  --teal: var(--color-primary);
+}
+
+/* ========================================
+   DEVELOPER SETTINGS PANEL
+======================================== */
+.settings-panel {
+  width: 270px;
+  min-width: 270px;
+  height: 100%;
+  overflow-y: auto;
+  background: var(--color-panel);
+  color: var(--color-foreground);
+  border-right: 1px solid var(--color-border);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+.settings-content {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  padding: 22px 17px 30px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 13px;
+  padding-bottom: 21px;
+  border-bottom: 1px solid var(--color-border);
+}
+.settings-section:last-of-type { border-bottom: none; }
+
+.settings-section h3 {
+  margin: 0 0 3px;
+  color: var(--color-primary);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
+.settings-label {
+  display: block;
+  margin-bottom: 2px;
+  color: var(--color-foreground);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.settings-select {
+  width: 100%;
+  min-height: 43px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.settings-select:hover, .settings-select:focus { border-color: var(--color-primary); }
+.settings-select:focus {
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
+}
+.settings-select option { background: var(--color-panel); color: var(--color-foreground); }
+
+.settings-color-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 48px;
+  padding: 8px 11px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: var(--color-background);
+  transition: border-color 0.2s ease;
+}
+.settings-color-row:hover { border-color: var(--color-primary); }
+.settings-color-row input[type="color"] {
+  width: 38px;
+  height: 34px;
+  padding: 3px;
+  border: 1px solid var(--color-border);
+  border-radius: 6px;
+  background: transparent;
+  cursor: pointer;
+}
+.settings-color-row span {
+  color: var(--color-muted);
+  font-family: monospace;
+  font-size: 12px;
+}
+
+.settings-section input[type="range"] {
+  width: 100%;
+  height: 6px;
+  margin: 7px 0;
+  border-radius: 20px;
+  accent-color: var(--color-primary);
+  cursor: pointer;
+}
+
+.settings-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 38px;
+  color: var(--color-foreground);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+.settings-toggle input[type="checkbox"] {
+  appearance: none;
+  -webkit-appearance: none;
+  position: relative;
+  flex-shrink: 0;
+  width: 37px;
+  height: 21px;
+  margin: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 20px;
+  background: var(--color-background);
+  cursor: pointer;
+  transition: background 0.2s ease, border-color 0.2s ease;
+}
+.settings-toggle input[type="checkbox"]::before {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: var(--color-muted);
+  transition: transform 0.2s ease, background 0.2s ease;
+}
+.settings-toggle input[type="checkbox"]:checked {
+  background: var(--color-primary);
+  border-color: var(--color-primary);
+}
+.settings-toggle input[type="checkbox"]:checked::before {
+  background: #ffffff;
+  transform: translateX(16px);
+}
+.settings-toggle input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 3px;
+}
+
+.settings-reset {
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  background: transparent;
+  color: var(--color-foreground);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.settings-reset:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: color-mix(in srgb, var(--color-primary) 9%, transparent);
+  transform: translateY(-1px);
+}
+.settings-reset:active { transform: translateY(0); }
+.settings-panel::-webkit-scrollbar { width: 5px; }
+.settings-panel::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 10px; }
+.settings-panel::-webkit-scrollbar-thumb:hover { background: var(--color-primary); }
+
+/* ========================================
+   SETTINGS THEME PREVIEW CARDS
+======================================== */
+.settings-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+.settings-theme-card {
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid var(--color-border);
+  border-radius: 9px;
+  background: var(--color-background);
+  color: var(--color-foreground);
+  text-align: left;
+  cursor: pointer;
+  transition: border-color 0.2s ease, transform 0.2s ease;
+}
+.settings-theme-card:hover { border-color: var(--color-primary); transform: translateY(-2px); }
+.settings-theme-card.active { border: 2px solid var(--color-primary); padding: 6px; }
+.settings-theme-preview {
+  display: flex;
+  height: 49px;
+  overflow: hidden;
+  border: 1px solid var(--color-border);
+  border-radius: 5px;
+}
+.settings-theme-preview-sidebar { width: 24%; border-right: 1px solid #88888833; }
+.settings-theme-preview-content {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  padding: 7px;
+}
+.settings-theme-preview-content span {
+  width: 75%;
+  height: 3px;
+  border-radius: 5px;
+  background: #88888880;
+}
+.settings-theme-preview-content span:first-child { width: 45%; }
+.settings-theme-info {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 3px;
+  padding: 8px 2px 2px;
+  font-size: 10px;
+  font-weight: 600;
+}
+.settings-theme-check { color: var(--color-primary); font-size: 14px; font-weight: 800; }
+
+/* ========================================
+   ACCESSIBILITY & RESPONSIVE SETTINGS
+======================================== */
+.reduce-motion *, .reduce-motion *::before, .reduce-motion *::after {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.01ms !important;
+  scroll-behavior: auto !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .settings-panel *, .settings-panel *::before, .settings-panel *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+@media (max-width: 600px) {
+  .settings-panel { width: min(270px, 80vw); min-width: min(270px, 80vw); }
+  .settings-content { padding: 18px 14px 25px; }
 }

@@ -320,3 +320,80 @@
     min-height: 51px;
   }
 }
+
+
+/* ==========================================
+   PORTFOLIO ASSISTANT — GLOBAL THEME SUPPORT
+========================================== */
+
+/* Default dark theme */
+.assistant-panel {
+  background: var(--color-panel) !important;
+  color: var(--color-foreground) !important;
+  border-left-color: var(--color-border) !important;
+}
+
+.assistant-heading,
+.assistant-workspace {
+  background: var(--color-panel) !important;
+  border-color: var(--color-border) !important;
+}
+
+.assistant-heading,
+.assistant-heading-title,
+.assistant-welcome h3 {
+  color: var(--color-foreground) !important;
+}
+
+.assistant-welcome p,
+.assistant-disclaimer,
+.assistant-message {
+  color: var(--color-muted) !important;
+}
+
+.assistant-prompts button,
+.assistant-input {
+  background: var(--color-background) !important;
+  color: var(--color-foreground) !important;
+  border-color: var(--color-border) !important;
+}
+
+.assistant-input input {
+  background: transparent !important;
+  color: var(--color-foreground) !important;
+}
+
+.assistant-message-user {
+  background: color-mix(
+    in srgb,
+    var(--color-primary) 12%,
+    var(--color-panel)
+  ) !important;
+}
+
+.assistant-message-ai {
+  background: var(--color-background) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* Light theme */
+:root[data-theme="light"] .assistant-panel {
+  color-scheme: light;
+}
+
+:root[data-theme="light"] .assistant-avatar {
+  background: color-mix(in srgb, var(--color-primary) 12%, white) !important;
+  color: var(--color-primary) !important;
+  border-color: var(--color-border) !important;
+}
+
+/* All themes: accent color */
+.assistant-heading-icon,
+.assistant-message-user .assistant-message-label {
+  color: var(--color-primary) !important;
+}
+
+.assistant-prompts button:hover,
+.assistant-input:focus-within {
+  border-color: var(--color-primary) !important;
+}

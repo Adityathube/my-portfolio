@@ -37,7 +37,7 @@ const FileIcon = ({ name, size = 16 }) => {
 }
 
 const files = [
-  { name: 'home.jsx', icon: '⚛', color: '#20b2a6' },
+  { name: 'home.jsx', icon: '⚛', color: '#e5a50a' },
   { name: 'about.html', icon: '▣', color: '#e87952' },
   { name: 'projects.js', icon: 'JS', color: '#e5c454' },
   { name: 'github.json', icon: 'GH', color: '#d4d4d4' },
@@ -60,7 +60,7 @@ const portfolioExtensions = [
   { id: 'sql', name: 'SQL', publisher: 'Database Skills', icon: 'DB', color: '#5799e8', category: 'Database', description: 'Query, filter, and analyze relational database data.' },
   { id: 'java', name: 'Java', publisher: 'Language Support', icon: '☕', color: '#e87952', category: 'Language', description: 'Object-oriented programming for application development.' },
   { id: 'powerbi', name: 'Power BI', publisher: 'Data Analytics', icon: '▥', color: '#e5c454', category: 'Data', description: 'Turn datasets into interactive reports and dashboards.' },
-  { id: 'cybersecurity', name: 'Cybersecurity', publisher: 'Security Learning', icon: '◇', color: '#20b2a6', category: 'Security', description: 'Explore security fundamentals, analysis, and defensive practices.' },
+  { id: 'cybersecurity', name: 'Cybersecurity', publisher: 'Security Learning', icon: '◇', color: '#e5a50a', category: 'Security', description: 'Explore security fundamentals, analysis, and defensive practices.' },
 ]
 
 const pageContent = {
@@ -1495,11 +1495,11 @@ function CustomCursor() {
       cursor.style.display = 'flex';
       cursor.style.width = hovering ? '48px' : '40px';
       cursor.style.height = hovering ? '48px' : '40px';
-      cursor.style.borderColor = hovering ? '#20b2a6' : 'rgba(220, 230, 240, 0.8)';
+      cursor.style.borderColor = hovering ? '#e5a50a' : 'rgba(220, 230, 240, 0.8)';
 
       const dot = cursor.firstElementChild;
       if (dot) {
-        dot.style.background = hovering ? '#20b2a6' : '#e6f1ff';
+        dot.style.background = hovering ? '#e5a50a' : '#e6f1ff';
         dot.style.boxShadow = hovering
           ? '0 0 10px rgba(32, 178, 166, 0.95)'
           : '0 0 8px rgba(230, 241, 255, 0.9)';
@@ -1562,6 +1562,90 @@ function App() {
   const [activeFile, setActiveFile] = useState('home.jsx')
   const [assistantOpen, setAssistantOpen] = useState(true)
   const [activeSidebar, setActiveSidebar] = useState('explorer')
+  const [settingsOpen, setSettingsOpen] = useState(false)
+  // Resizable IDE side panels (VS Code-style drag handles).
+  const [explorerWidth, setExplorerWidth] = useState(240)
+  const [assistantWidth, setAssistantWidth] = useState(330)
+  const resizeState = useRef(null)
+
+  useEffect(() => {
+    const handlePointerMove = (event) => {
+      if (!resizeState.current) return
+      const { side, startX, startWidth } = resizeState.current
+      const delta = event.clientX - startX
+      if (side === 'explorer') {
+        setExplorerWidth(Math.min(360, Math.max(150, startWidth + delta)))
+      } else {
+        setAssistantWidth(Math.min(420, Math.max(220, startWidth - delta)))
+      }
+    }
+    const handlePointerUp = () => {
+      resizeState.current = null
+      document.body.classList.remove('is-panel-resizing')
+    }
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', handlePointerUp)
+    return () => {
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', handlePointerUp)
+      document.body.classList.remove('is-panel-resizing')
+    }
+  }, [])
+
+  const startPanelResize = (side, event) => {
+    event.preventDefault()
+    resizeState.current = {
+      side,
+      startX: event.clientX,
+      startWidth: side === 'explorer' ? explorerWidth : assistantWidth,
+    }
+    document.body.classList.add('is-panel-resizing')
+  }
+
+  const [settings, setSettings] = useState(() => {
+    try {
+      const saved = localStorage.getItem('portfolio-settings')
+      return saved ? JSON.parse(saved) : {
+        theme: 'monokai',
+        accentColor: '#e5a50a',
+        fontSize: 15,
+        lineNumbers: true,
+        reducedMotion: false,
+        showAssistant: true,
+      }
+    } catch {
+      return {
+        theme: 'monokai',
+        accentColor: '#e5a50a',
+        fontSize: 15,
+        lineNumbers: true,
+        reducedMotion: false,
+        showAssistant: true,
+      }
+    }
+  })
+  useEffect(() => {
+  localStorage.setItem('portfolio-settings', JSON.stringify(settings))
+  }, [settings])  
+  useEffect(() => {
+  document.documentElement.dataset.theme = settings.theme
+  document.documentElement.style.setProperty(
+    '--color-primary',
+    settings.accentColor
+  )
+  document.documentElement.style.setProperty(
+    '--editor-font-size',
+    `${settings.fontSize}px`
+  )
+  document.documentElement.style.setProperty(
+  '--editor-zoom',
+  String(settings.fontSize / 14)
+  )
+  document.documentElement.classList.toggle(
+    'reduce-motion',
+    settings.reducedMotion
+  )
+  }, [settings])
   const [repoExpanded, setRepoExpanded] = useState(false)
   const [portfolioRepoExpanded, setPortfolioRepoExpanded] = useState(false)
 
@@ -1718,11 +1802,222 @@ const toggleFolder = (folder) => {
             onClick={() => setActiveSidebar('extensions')}
           ><VscExtensions size={21} /></button>
           <div className="activity-bottom">
-            <button className="activity-icon" title="Settings" aria-label="Settings"><VscSettingsGear size={20} /></button>
+            <button
+              className={`activity-icon ${settingsOpen ? 'selected' : ''}`}
+              title="Settings"
+              aria-label="Settings"
+              onClick={() => {
+                setSettingsOpen(!settingsOpen)
+                setActiveSidebar('settings')
+              }}
+            >
+              <VscSettingsGear size={20} />
+            </button>
           </div>
         </aside>
-        {/* Sidebar: Explorer or Source Control */}
-        {activeSidebar === 'source-control' ? (
+        {/* Resizable left sidebar: Explorer, Search, Extensions, Settings, etc. */}
+        <div className="explorer-resize-shell" style={{ width: `${explorerWidth}px` }}>
+        {activeSidebar === 'settings' ? (
+          <aside className="explorer settings-panel">
+            <div className="explorer-heading">SETTINGS</div>
+
+            <div className="settings-content">
+
+              {/* Appearance */}
+              <section className="settings-section">
+                <h3>APPEARANCE</h3>
+
+                
+<label className="settings-label">Color Theme</label>
+
+<div className="settings-theme-grid">
+  {[
+    {
+      value: "dark",
+      name: "Dark Developer",
+      background: "#0f1418",
+      panel: "#141a1f",
+      accent: "#20b2a6",
+    },
+    {
+      value: "light",
+      name: "Light Developer",
+      background: "#f5f7fa",
+      panel: "#ffffff",
+      accent: "#087f78",
+    },
+    {
+      value: "dracula",
+      name: "Dracula",
+      background: "#282a36",
+      panel: "#21222c",
+      accent: "#bd93f9",
+    },
+    {
+      value: "monokai",
+      name: "Monokai",
+      background: "#272822",
+      panel: "#1e1f1c",
+      accent: "#e5a50a",
+    },
+    {
+      value: "nord",
+      name: "Nord",
+      background: "#2e3440",
+      panel: "#272e3a",
+      accent: "#88c0d0",
+    },
+  ].map((theme) => (
+    <button
+      key={theme.value}
+      type="button"
+      className={`settings-theme-card ${
+        settings.theme === theme.value ? "active" : ""
+      }`}
+      onClick={() =>
+        setSettings((prev) => ({
+          ...prev,
+          theme: theme.value,
+        }))
+      }
+      aria-pressed={settings.theme === theme.value}
+    >
+      <div
+        className="settings-theme-preview"
+        style={{ background: theme.background }}
+      >
+        <div
+          className="settings-theme-preview-sidebar"
+          style={{ background: theme.panel }}
+        />
+        <div className="settings-theme-preview-content">
+          <span style={{ background: theme.accent }} />
+          <span />
+          <span />
+        </div>
+      </div>
+
+      <div className="settings-theme-info">
+        <span>{theme.name}</span>
+        {settings.theme === theme.value && (
+          <span className="settings-theme-check">✓</span>
+        )}
+      </div>
+    </button>
+  ))}
+</div>
+
+
+                <label className="settings-label">Accent Color</label>
+                <div className="settings-color-row">
+                  <input
+                    type="color"
+                    value={settings.accentColor}
+                    onChange={(e) =>
+                      setSettings(prev => ({ ...prev, accentColor: e.target.value }))
+                    }
+                  />
+                  <span>{settings.accentColor}</span>
+                </div>
+              </section>
+
+              {/* Editor */}
+              <section className="settings-section">
+                <h3>EDITOR</h3>
+
+                <label className="settings-label">
+                  Font Size: {settings.fontSize}px
+                </label>
+                <input
+                  type="range"
+                  min="12"
+                  max="22"
+                  value={settings.fontSize}
+                  onChange={(e) =>
+                    setSettings(prev => ({
+                      ...prev,
+                      fontSize: Number(e.target.value)
+                    }))
+                  }
+                />
+
+                <label className="settings-toggle">
+                  <span>Show line numbers</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.lineNumbers}
+                    onChange={(e) =>
+                      setSettings(prev => ({
+                        ...prev,
+                        lineNumbers: e.target.checked
+                      }))
+                    }
+                  />
+                </label>
+              </section>
+
+              {/* Workspace */}
+              <section className="settings-section">
+                <h3>WORKSPACE</h3>
+
+                <label className="settings-toggle">
+                  <span>Portfolio Assistant</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.showAssistant}
+                    onChange={(e) => {
+                      const visible = e.target.checked
+                      setSettings(prev => ({
+                        ...prev,
+                        showAssistant: visible
+                      }))
+                      setAssistantOpen(visible)
+                    }}
+                  />
+                </label>
+              </section>
+
+              {/* Accessibility */}
+              <section className="settings-section">
+                <h3>ACCESSIBILITY</h3>
+
+                <label className="settings-toggle">
+                  <span>Reduce motion</span>
+                  <input
+                    type="checkbox"
+                    checked={settings.reducedMotion}
+                    onChange={(e) =>
+                      setSettings(prev => ({
+                        ...prev,
+                        reducedMotion: e.target.checked
+                      }))
+                    }
+                  />
+                </label>
+              </section>
+
+              <button
+                className="settings-reset"
+                onClick={() => {
+                  const defaults = {
+                    theme: 'monokai',
+                    accentColor: '#e5a50a',
+                    fontSize: 15,
+                    lineNumbers: true,
+                    reducedMotion: false,
+                    showAssistant: true,
+                  }
+                  setSettings(defaults)
+                  setAssistantOpen(true)
+                }}
+              >
+                Reset to Defaults
+              </button>
+
+            </div>
+          </aside>
+        ) : activeSidebar === 'source-control' ? (
+
           <aside className="explorer source-control-panel">
             <div className="explorer-heading">SOURCE CONTROL</div>
             <button
@@ -2068,6 +2363,15 @@ const toggleFolder = (folder) => {
             <button className="source-control-primary-link source-control-return" onClick={() => setActiveSidebar('explorer')}>← Back to Explorer</button>
           </aside>
         )}
+        </div>
+        <div
+          className="panel-resizer panel-resizer-left"
+          role="separator"
+          aria-orientation="vertical"
+          aria-label="Resize Explorer panel"
+          title="Drag to resize Explorer"
+          onPointerDown={(event) => startPanelResize('explorer', event)}
+        />
 
         {/* Main editor */}
         <main className="editor-area">
@@ -2094,7 +2398,7 @@ const toggleFolder = (folder) => {
           </div>
 
           
-
+<div className="editor-content">
 {activeFile === 'about.html' ? (
             <AboutSection />
           ) : activeFile === 'projects.js' ? (
@@ -2224,7 +2528,7 @@ const toggleFolder = (folder) => {
             </>
           )}
 
-
+        </div>
           <div className="editor-bottom">
             <span>◈ {page.label}</span>
             <span>React · JavaScript</span>
@@ -2233,7 +2537,16 @@ const toggleFolder = (folder) => {
 
         {/* Right assistant panel */}
         {assistantOpen && (
-          <aside className="assistant-panel">
+          <>
+          <div
+            className="panel-resizer panel-resizer-right"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize Portfolio Assistant panel"
+            title="Drag to resize Portfolio Assistant"
+            onPointerDown={(event) => startPanelResize('assistant', event)}
+          />
+          <aside className="assistant-panel" style={{ width: `${assistantWidth}px` }}>
             <div className="assistant-heading">
               <span className="assistant-heading-icon"><VscSparkle size={17} /></span>
               <span className="assistant-heading-title">Portfolio Assistant</span>
@@ -2323,7 +2636,7 @@ const toggleFolder = (folder) => {
               ))}
               {chatLoading && (
                 <div style={{ color: '#9ba9b8', fontSize: '12px', padding: '6px 2px' }}>
-                  <span style={{ color: '#20b2a6' }}>●</span> Thinking...
+                  <span style={{ color: '#e5a50a' }}>●</span> Thinking...
                 </div>
               )}
               {chatError && (
@@ -2358,6 +2671,7 @@ const toggleFolder = (folder) => {
               </button>
             </form>
           </aside>
+          </>
         )}
       </div>
 
