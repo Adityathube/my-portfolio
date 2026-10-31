@@ -98,6 +98,7 @@ Keep answers friendly and focused on the visitor's question.`,
   }
 })
 
+
 app.post('/api/contact', async (req, res) => {
   try {
     const { name, email, subject, message } = req.body
@@ -134,25 +135,18 @@ app.post('/api/contact', async (req, res) => {
       })
     }
 
-    if (!process.env.GMAIL_USER || !process.env.GMAIL_APP_PASSWORD) {
+    if (!process.env.RESEND_API_KEY || !process.env.GMAIL_USER) {
       return res.status(500).json({
-        error: 'Contact email service is not configured yet.',
+        error: 'Contact email service is not configured.',
       })
     }
 
-    const nodemailer = (await import('nodemailer')).default
+    const { Resend } = await import('resend')
+    const resend = new Resend(process.env.RESEND_API_KEY)
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.GMAIL_USER,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    })
-
-    await transporter.sendMail({
-      from: process.env.GMAIL_USER,
-      to: process.env.GMAIL_USER,
+    const { data, error } = await resend.emails.send({
+      from: 'Portfolio Contact <onboarding@resend.dev>',
+      to: [process.env.GMAIL_USER],
       replyTo: email.trim(),
       subject: `Portfolio Contact: ${subject.trim()}`,
       text: [
@@ -164,6 +158,15 @@ app.post('/api/contact', async (req, res) => {
         message.trim(),
       ].join('\n'),
     })
+
+    if (error) {
+      console.error('Resend email error:', error)
+      return res.status(502).json({
+        error: 'Unable to send your message right now. Please try again later.',
+      })
+    }
+
+    console.log('Contact email sent successfully:', data?.id)
 
     return res.json({
       success: true,
