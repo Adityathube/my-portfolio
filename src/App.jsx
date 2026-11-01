@@ -1568,6 +1568,8 @@ function App() {
   const [explorerWidth, setExplorerWidth] = useState(240)
   const [assistantWidth, setAssistantWidth] = useState(330)
   const resizeState = useRef(null)
+  // Scroll reveal animation reference
+  const editorContentRef = useRef(null)
 
   useEffect(() => {
     const handlePointerMove = (event) => {
@@ -1647,6 +1649,51 @@ function App() {
     settings.reducedMotion
   )
   }, [settings])
+
+// Scroll-triggered reveal for editor content
+useEffect(() => {
+  const editor = editorContentRef.current
+
+  if (!editor) return
+
+  const elements = Array.from(editor.children)
+
+  if (settings.reducedMotion || !('IntersectionObserver' in window)) {
+    elements.forEach((element) => {
+      element.classList.remove('scroll-reveal-item', 'scroll-reveal-visible')
+    })
+    return
+  }
+
+  const observer = new IntersectionObserver(
+    (entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('scroll-reveal-visible')
+          observer.unobserve(entry.target)
+        }
+      })
+    },
+    {
+      root: editor,
+      threshold: 0.12,
+      rootMargin: '0px 0px -35px 0px',
+    }
+  )
+
+  elements.forEach((element) => {
+    element.classList.add('scroll-reveal-item')
+    observer.observe(element)
+  })
+
+  return () => {
+    observer.disconnect()
+    elements.forEach((element) => {
+      element.classList.remove('scroll-reveal-item', 'scroll-reveal-visible')
+    })
+  }
+}, [activeFile, settings.reducedMotion])
+
   const [repoExpanded, setRepoExpanded] = useState(false)
   const [portfolioRepoExpanded, setPortfolioRepoExpanded] = useState(false)
 
@@ -1672,6 +1719,8 @@ const toggleFolder = (folder) => {
   const [chatInput, setChatInput] = useState('')
   const [chatLoading, setChatLoading] = useState(false)
   const [chatError, setChatError] = useState('')
+  // Hero tagline typing animation
+  const [typedTagline, setTypedTagline] = useState('')
 
 
   const searchResults = files.filter((file) => {
@@ -1688,6 +1737,30 @@ const toggleFolder = (folder) => {
   })
 
   const page = pageContent[activeFile]
+  // Animate the existing hero tagline
+useEffect(() => {
+  const fullText = pageContent[activeFile]?.tagline || ''
+
+  if (settings.reducedMotion) {
+    setTypedTagline(fullText)
+    return
+  }
+
+  setTypedTagline('')
+
+  let index = 0
+
+  const typingInterval = window.setInterval(() => {
+    index += 1
+    setTypedTagline(fullText.slice(0, index))
+
+    if (index >= fullText.length) {
+      window.clearInterval(typingInterval)
+    }
+  }, 45)
+
+  return () => window.clearInterval(typingInterval)
+}, [activeFile, settings.reducedMotion])
   const filteredExtensions = portfolioExtensions.filter((extension) =>
     `${extension.name} ${extension.publisher} ${extension.category} ${extension.description}`.toLowerCase().includes(extensionQuery.trim().toLowerCase())
   )
@@ -2399,7 +2472,7 @@ const toggleFolder = (folder) => {
           </div>
 
           
-<div className="editor-content">
+<div className="editor-content" ref={editorContentRef}>
 {activeFile === 'about.html' ? (
             <AboutSection />
           ) : activeFile === 'projects.js' ? (
@@ -2439,7 +2512,7 @@ const toggleFolder = (folder) => {
                   </div>
 
                   <p className="hero-tagline">
-                    {page.tagline}
+                    {typedTagline}
                     <span className="cursor">▍</span>
                   </p>
 
