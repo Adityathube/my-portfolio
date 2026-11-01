@@ -6518,3 +6518,11 @@ body.is-panel-resizing * {
     font-size: 10px;
   }
 }
+
+/* Separator between editor bottom and status bar */
+.status-bar {
+  border-top: 1px solid var(--color-border, rgba(255, 255, 255, 0.14));
+  box-sizing: border-box;
+  position: relative;
+  z-index: 5;
+}
