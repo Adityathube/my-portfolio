@@ -4730,9 +4730,9 @@ textarea {
   gap: 18px; margin-bottom: 20px;
 }
 .feature-code-label, .feature-section-heading small { color: #85858d; font-size: 10px; letter-spacing: .6px; }
-.case-study-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+.case-study-list {grid-template-columns: minmax(0, 1fr);gap: 14px; }
 .case-study-card { max-width: none; margin: 0; min-width: 0; }
-.case-study-card:first-child { grid-column: 1 / -1; }
+.case-study-card:first-child { grid-column: auto; }
 .case-study-domain { margin: 10px 0 0; color: #e5a50a; font-size: 10px; letter-spacing: 1px; }
 .case-study-details { margin-top: 15px; border-top: 1px solid #35353a; border-bottom: 1px solid #35353a; }
 .case-study-details summary {
@@ -6525,4 +6525,306 @@ body.is-panel-resizing * {
   box-sizing: border-box;
   position: relative;
   z-index: 5;
+}
+
+
+/* =========================================
+   PORTFOLIO ANIMATIONS — HYBRID / BALANCED
+========================================= */
+
+/* Hero text entrance */
+.hero-content {
+  animation: heroReveal 850ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.hero-comment {
+  animation: heroReveal 650ms ease both;
+  animation-delay: 100ms;
+}
+
+.hero-name {
+  animation: heroReveal 800ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: 180ms;
+}
+
+.name-accent {
+  display: inline-block;
+  animation: amberReveal 900ms ease both;
+  animation-delay: 350ms;
+}
+
+.role-badges {
+  animation: heroReveal 750ms ease both;
+  animation-delay: 450ms;
+}
+
+.hero-tagline {
+  animation: heroReveal 750ms ease both;
+  animation-delay: 550ms;
+}
+
+.hero-description {
+  animation: heroReveal 800ms ease both;
+  animation-delay: 650ms;
+}
+
+.hero-actions {
+  animation: heroReveal 800ms ease both;
+  animation-delay: 750ms;
+}
+
+/* Profile portrait */
+.hero-portrait {
+  animation: portraitReveal 1000ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  animation-delay: 300ms;
+}
+
+.profile-image {
+  transition:
+    transform 400ms ease,
+    box-shadow 400ms ease,
+    border-color 400ms ease;
+  animation: portraitFloat 5s ease-in-out infinite;
+}
+
+@keyframes heroReveal {
+  from {
+    opacity: 0;
+    transform: translateY(22px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes amberReveal {
+  from {
+    opacity: 0;
+    transform: translateY(15px);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+}
+
+@keyframes portraitReveal {
+  from {
+    opacity: 0;
+    transform: translateX(35px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes portraitFloat {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Accessibility: preserve reduced-motion setting */
+.reduce-motion .hero-content,
+.reduce-motion .hero-comment,
+.reduce-motion .hero-name,
+.reduce-motion .name-accent,
+.reduce-motion .role-badges,
+.reduce-motion .hero-tagline,
+.reduce-motion .hero-description,
+.reduce-motion .hero-actions,
+.reduce-motion .hero-portrait,
+.reduce-motion .profile-image {
+  animation: none !important;
+  transform: none !important;
+  filter: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-content,
+  .hero-comment,
+  .hero-name,
+  .name-accent,
+  .role-badges,
+  .hero-tagline,
+  .hero-description,
+  .hero-actions,
+  .hero-portrait,
+  .profile-image {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
+
+
+/* =========================================
+   SCROLL-TRIGGERED REVEAL ANIMATION
+   Additive animation — existing styles preserved
+========================================= */
+
+.editor-content > .scroll-reveal-item {
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 650ms ease,
+    transform 650ms cubic-bezier(0.2, 0.7, 0.2, 1);
+  will-change: opacity, transform;
+}
+
+.editor-content > .scroll-reveal-item.scroll-reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Respect the existing reduced-motion setting */
+.reduce-motion .editor-content > .scroll-reveal-item {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: auto;
+}
+
+/* Respect operating-system accessibility preference */
+@media (prefers-reduced-motion: reduce) {
+  .editor-content > .scroll-reveal-item {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+    will-change: auto;
+  }
+}
+
+
+/* =========================================
+/* =========================================
+   ADDITIVE SECTION ANIMATIONS
+   Existing layout, colors, transforms and hover behavior are preserved.
+========================================= */
+
+/* A gentle entrance for content blocks on each portfolio page. */
+@keyframes contentBlockReveal {
+  from {
+    opacity: 0;
+    translate: 0 14px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.about-content > *,
+.projects-content > *,
+.skills-dashboard > *,
+.experience-content > *,
+.contact-content > *,
+.github-dashboard > *,
+.resume-page > *,
+.sql-page > *,
+.readme-content > * {
+  animation: contentBlockReveal 560ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.about-content > *:nth-child(2),
+.projects-content > *:nth-child(2),
+.skills-dashboard > *:nth-child(2),
+.experience-content > *:nth-child(2),
+.contact-content > *:nth-child(2),
+.github-dashboard > *:nth-child(2),
+.resume-page > *:nth-child(2),
+.sql-page > *:nth-child(2),
+.readme-content > *:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.about-content > *:nth-child(3),
+.projects-content > *:nth-child(3),
+.skills-dashboard > *:nth-child(3),
+.experience-content > *:nth-child(3),
+.contact-content > *:nth-child(3),
+.github-dashboard > *:nth-child(3),
+.resume-page > *:nth-child(3),
+.sql-page > *:nth-child(3),
+.readme-content > *:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.about-content > *:nth-child(4),
+.projects-content > *:nth-child(4),
+.skills-dashboard > *:nth-child(4),
+.experience-content > *:nth-child(4),
+.contact-content > *:nth-child(4),
+.github-dashboard > *:nth-child(4),
+.resume-page > *:nth-child(4),
+.sql-page > *:nth-child(4),
+.readme-content > *:nth-child(4) {
+  animation-delay: 210ms;
+}
+
+/* Stagger project cards without taking control of their existing transform hover effect. */
+@keyframes projectCardFadeUp {
+  from {
+    opacity: 0;
+    translate: 0 18px;
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+
+.projects-content .case-study-card {
+  animation: projectCardFadeUp 650ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+}
+
+.projects-content .case-study-card:nth-child(2) {
+  animation-delay: 130ms;
+}
+
+/* Smooth focus feedback for project repository links; no layout or color redesign. */
+.project-card-footer a {
+  transition: opacity 220ms ease;
+}
+
+.project-card-footer a:hover {
+  opacity: 0.82;
+}
+
+/* Accessibility: all added animations respect the portfolio setting and OS preference. */
+.reduce-motion .about-content > *,
+.reduce-motion .projects-content > *,
+.reduce-motion .skills-dashboard > *,
+.reduce-motion .experience-content > *,
+.reduce-motion .contact-content > *,
+.reduce-motion .github-dashboard > *,
+.reduce-motion .resume-page > *,
+.reduce-motion .sql-page > *,
+.reduce-motion .readme-content > *,
+.reduce-motion .projects-content .case-study-card {
+  animation: none !important;
+  translate: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .about-content > *,
+  .projects-content > *,
+  .skills-dashboard > *,
+  .experience-content > *,
+  .contact-content > *,
+  .github-dashboard > *,
+  .resume-page > *,
+  .sql-page > *,
+  .readme-content > *,
+  .projects-content .case-study-card {
+    animation: none !important;
+    translate: none !important;
+  }
 }
