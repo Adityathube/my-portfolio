@@ -255,6 +255,7 @@ function ProjectsSection() {
       domain: 'FRONTEND + AI',
       description: 'A VS Code-inspired portfolio built with React and Vite, with an Express-backed Portfolio Assistant.',
       stack: ['React', 'Vite', 'JavaScript', 'CSS', 'Express', 'OpenRouter'],
+      link: 'https://github.com/Adityathube/my-portfolio',
       details: [
         ['Interface', 'Editor tabs, Explorer-style navigation, a custom cursor, and a charcoal-and-teal theme.'],
         ['Assistant', 'The frontend sends chat requests to the local Express API endpoint.'],
@@ -1115,14 +1116,14 @@ function ExperienceSection() {
       skills: ['Java', 'DBMS', 'Computer Networks', 'SQL'],
     },
     {
-      date: 'Hackathon',
-      type: 'CYBERSECURITY',
-      title: 'Cybersecurity CTF Challenges',
-      organization: 'Team activity',
-      description: 'Participated in Capture The Flag (CTF) challenges to practice cybersecurity concepts, problem-solving, and security analysis.',
-      skills: ['Cybersecurity', 'CTF', 'Problem Solving'],
-      link: 'https://drive.google.com/file/d/1Ot_hjH0Uhu4rtrkLVS8rWcnocVIpwyOr/view?usp=sharing',
-      linkLabel: 'View certificate'
+      date: 'Web Development',
+      type: 'PERSONAL PROJECT',
+      title: 'Developer Portfolio Website',
+      organization: 'Full-Stack Development',
+      description: 'Built a personal developer portfolio inspired by a VS Code workspace, featuring an AI-powered assistant and interactive interface.',
+      skills: ['React', 'Vite', 'Tailwind CSS', 'OpenRouter', 'Vercel', 'Render', 'Resend'],
+      link: 'https://my-portfolio-six-tau-80.vercel.app/',
+      linkLabel: 'View Live Project'
     },
   ]
 
