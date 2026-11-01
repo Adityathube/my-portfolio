@@ -6319,3 +6319,202 @@ body.is-panel-resizing * {
   .explorer-resize-shell { max-width: 55vw; }
   .panel-resizer-left { flex-basis: 4px; width: 4px; }
 }
+
+/* =========================================================
+   RESPONSIVE PORTFOLIO ASSISTANT RESIZING + EDITOR SCROLLING
+   Added as a final override so older rules above cannot
+   disable resizing or create nested scroll containers.
+   ========================================================= */
+
+/* Keep the application usable on narrow viewports. */
+html,
+body,
+#root {
+  width: 100%;
+  min-width: 320px;
+  min-height: 100%;
+}
+
+.ide {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.ide-workspace {
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* The editor itself must not become a second scroll container. */
+.editor-area {
+  display: flex;
+  flex: 1 1 0%;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.editor-content {
+  display: block;
+  flex: 1 1 0%;
+  width: 100%;
+  height: 0;
+  min-width: 0;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+}
+
+/* Use one scroll area: individual portfolio pages grow naturally. */
+.editor-content .hero-content,
+.editor-content .about-content,
+.editor-content .projects-content,
+.editor-content .skills-dashboard,
+.editor-content .experience-content,
+.editor-content .contact-content,
+.editor-content .readme-content {
+  height: auto !important;
+  min-height: 0;
+  overflow: visible !important;
+  overflow-x: visible !important;
+  overflow-y: visible !important;
+  overscroll-behavior: auto;
+}
+
+.editor-content .readme-license,
+.editor-content .readme-footer {
+  height: auto;
+  visibility: visible;
+}
+
+/* Desktop/tablet: assistant remains a normal resizable flex panel. */
+.assistant-panel {
+  display: flex !important;
+  flex: 0 0 auto;
+  min-width: 180px;
+  max-width: 65vw;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.panel-resizer-right {
+  display: block !important;
+  position: relative;
+  z-index: 50;
+  flex: 0 0 8px;
+  width: 8px;
+  min-width: 8px;
+  margin: 0 -2px;
+  cursor: col-resize;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  background: transparent;
+}
+
+.panel-resizer-right::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  width: 2px;
+  background: transparent;
+  transition: background 140ms ease, width 140ms ease;
+}
+
+.panel-resizer-right:hover::after,
+.panel-resizer-right:active::after,
+body.is-panel-resizing .panel-resizer-right::after {
+  left: 2px;
+  width: 4px;
+  background: var(--color-primary, var(--teal));
+}
+
+body.is-panel-resizing,
+body.is-panel-resizing * {
+  cursor: col-resize !important;
+  user-select: none !important;
+  -webkit-user-select: none !important;
+}
+
+/* Keep the assistant available when the browser is not maximized. */
+@media (max-width: 1050px) {
+  .assistant-panel {
+    display: flex !important;
+    max-width: 65vw;
+  }
+
+  .panel-resizer-right {
+    display: block !important;
+  }
+
+  .assistant-toggle {
+    display: inline-flex;
+  }
+}
+
+/* On phones, give the editor enough room and retain touch resizing. */
+@media (max-width: 650px) {
+  .ide {
+    min-height: 0;
+  }
+
+  .ide-workspace {
+    min-width: 0;
+  }
+
+  .explorer-resize-shell {
+    max-width: 30vw;
+  }
+
+  .explorer-resize-shell > .explorer {
+    min-width: 0;
+  }
+
+  .assistant-panel {
+    min-width: 170px;
+    max-width: 58vw;
+  }
+
+  .panel-resizer-right {
+    flex-basis: 10px;
+    width: 10px;
+    min-width: 10px;
+    margin: 0 -2px;
+  }
+
+  .assistant-heading {
+    min-width: 0;
+  }
+
+  .assistant-heading-title {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 380px) {
+  .assistant-panel {
+    min-width: 160px;
+    max-width: 55vw;
+  }
+
+  .assistant-toggle {
+    font-size: 10px;
+  }
+}
