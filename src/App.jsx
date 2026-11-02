@@ -1164,7 +1164,7 @@ function ExperienceSection() {
   )
 }
 
-function ContactSection() {
+function ContactSection({ notify }) {
   const contacts = [
     {
       label: 'EMAIL',
@@ -1198,54 +1198,55 @@ function ContactSection() {
   ]
 
     
+  const [isSubmitting, setIsSubmitting] = useState(false)
+
   async function handleSubmit(event) {
     event.preventDefault()
+    if (isSubmitting) return
 
     const form = event.currentTarget
-    const data = new FormData(form)
-
+    const formData = new FormData(form)
     const contact = {
-      name: data.get('name'),
-      email: data.get('email'),
-      subject: data.get('subject'),
-      message: data.get('message'),
+      name: String(formData.get('name') || '').trim(),
+      email: String(formData.get('email') || '').trim(),
+      subject: String(formData.get('subject') || '').trim(),
+      message: String(formData.get('message') || '').trim(),
     }
 
-    const submitButton = form.querySelector('button[type="submit"]')
-    const originalButtonText = submitButton.textContent
+    if (!contact.name || !contact.email || !contact.subject || !contact.message) {
+      notify('Please complete all fields before sending.', 'warning')
+      return
+    }
 
-    submitButton.disabled = true
-    submitButton.textContent = 'Sending...'
+    if (contact.name.length > 100 || contact.email.length > 254 || contact.subject.length > 200 || contact.message.length > 5000) {
+      notify('Please shorten one or more fields and try again.', 'warning')
+      return
+    }
+
+    setIsSubmitting(true)
 
     try {
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:3001'}/api/contact`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(contact),
-        }
-      )
+      const apiBaseUrl = (import.meta.env.VITE_API_URL || 'http://localhost:3001').replace(/\/$/, '')
+      const response = await fetch(`${apiBaseUrl}/api/contact`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(contact),
+      })
 
-      const result = await response.json()
-
+      const result = await response.json().catch(() => ({}))
       if (!response.ok) {
-        throw new Error(result.error || 'Could not send your message.')
+        throw new Error(result.error || `Message could not be sent (${response.status}).`)
       }
 
-      alert('Message sent successfully! Thank you for contacting me.')
       form.reset()
+      notify(result.message || 'Your message has been sent successfully!', 'success')
     } catch (error) {
       console.error('Contact form error:', error)
-      alert(error.message || 'Could not send your message. Please try again.')
+      notify(error.message || 'Could not send your message. Please try again.', 'error')
     } finally {
-      submitButton.disabled = false
-      submitButton.textContent = originalButtonText
+      setIsSubmitting(false)
     }
   }
-
 
   return (
     <section className="contact-content">
@@ -1311,6 +1312,8 @@ function ContactSection() {
               name="name"
               type="text"
               placeholder="Your name"
+              autoComplete="name"
+              maxLength={100}
               required
             />
 
@@ -1320,6 +1323,8 @@ function ContactSection() {
               name="email"
               type="email"
               placeholder="you@example.com"
+              autoComplete="email"
+              maxLength={254}
               required
             />
 
@@ -1329,6 +1334,8 @@ function ContactSection() {
               name="subject"
               type="text"
               placeholder="What would you like to discuss?"
+              required
+              maxLength={200}
             />
 
             <label htmlFor="contact-message">// MESSAGE *</label>
@@ -1337,15 +1344,16 @@ function ContactSection() {
               name="message"
               placeholder="Write your message..."
               rows="5"
+              maxLength={5000}
               required
             />
 
-            <button type="submit" className="contact-submit">
-              ↗ Send Message()
+            <button type="submit" className="contact-submit" disabled={isSubmitting}>
+              {isSubmitting ? '◌ Sending...' : '↗ Send Message()'}
             </button>
 
             <p className="contact-form-note">
-              // Opens your email app to send the message.
+              // Your message is sent securely through the portfolio contact API.
             </p>
           </form>
         </div>
@@ -1562,6 +1570,18 @@ function CustomCursor() {
 function App() {
   const [activeFile, setActiveFile] = useState('home.jsx')
   const [assistantOpen, setAssistantOpen] = useState(true)
+  const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
+  const [commandQuery, setCommandQuery] = useState('')
+  const [selectedCommandIndex, setSelectedCommandIndex] = useState(0)
+  const [terminalOpen, setTerminalOpen] = useState(false)
+  const [terminalInput, setTerminalInput] = useState('')
+  const [terminalHistory, setTerminalHistory] = useState([
+    { type: 'system', text: 'Welcome to Aditya\'s portfolio terminal. Type "help" to see available commands.' },
+  ])
+  const [notifications, setNotifications] = useState([])
+  const commandInputRef = useRef(null)
+  const terminalInputRef = useRef(null)
+  const notificationIdRef = useRef(0)
   const [activeSidebar, setActiveSidebar] = useState('explorer')
   const [settingsOpen, setSettingsOpen] = useState(false)
   // Resizable IDE side panels (VS Code-style drag handles).
@@ -1805,6 +1825,148 @@ useEffect(() => {
     }
   }
 
+  const notify = (message, type = 'info') => {
+    const id = ++notificationIdRef.current
+    setNotifications((current) => [...current, { id, message, type }].slice(-4))
+    window.setTimeout(() => {
+      setNotifications((current) => current.filter((item) => item.id !== id))
+    }, 4200)
+  }
+
+  const appendTerminalLine = (type, text) => {
+    setTerminalHistory((current) => [...current, { type, text }].slice(-80))
+  }
+
+  const runTerminalCommand = (rawCommand) => {
+    const command = rawCommand.trim()
+    if (!command) return
+
+    appendTerminalLine('command', `visitor@aditya-portfolio:~$ ${command}`)
+    const normalized = command.toLowerCase()
+
+    const responses = {
+      help: [
+        'Available commands:',
+        '  help       Show this command list',
+        '  about      Learn about Aditya',
+        '  skills     List technical skills',
+        '  projects   Open the projects section',
+        '  contact    Open the contact section',
+        '  github     Show the GitHub profile',
+        '  clear      Clear terminal output',
+      ],
+      about: ['Aditya Thube', 'Computer Science and Engineering student', 'Interested in software development, data, and cybersecurity.'],
+      skills: ['Java · JavaScript · SQL · HTML · CSS', 'React · Vite · Tailwind CSS · Power BI', 'DBMS · Computer Networks · Cybersecurity · Git · GitHub'],
+      whoami: ['visitor@aditya-portfolio', 'You are exploring a simulated portfolio terminal.'],
+      github: ['GitHub: https://github.com/Adityathube', 'Repository: https://github.com/Adityathube/my-portfolio'],
+    }
+
+    if (normalized === 'clear') {
+      setTerminalHistory([])
+      setTerminalInput('')
+      return
+    }
+
+    if (normalized === 'projects') {
+      setActiveFile('projects.js')
+      appendTerminalLine('success', 'Opened projects.js in the editor.')
+    } else if (normalized === 'contact') {
+      setActiveFile('contact.css')
+      appendTerminalLine('success', 'Opened contact.css in the editor.')
+    } else if (responses[normalized]) {
+      responses[normalized].forEach((line) => appendTerminalLine('output', line))
+    } else {
+      appendTerminalLine('error', `Command not found: ${command}. Type "help" to see available commands.`)
+    }
+
+    setTerminalInput('')
+  }
+
+  const executePaletteCommand = (command) => {
+    command.action()
+    setCommandPaletteOpen(false)
+    setCommandQuery('')
+  }
+
+  const paletteCommands = [
+    { label: 'Go to Home', detail: 'Open home.jsx', group: 'Navigation', action: () => setActiveFile('home.jsx') },
+    { label: 'Open About', detail: 'Open about.html', group: 'Navigation', action: () => setActiveFile('about.html') },
+    { label: 'Open Projects', detail: 'Open projects.js', group: 'Navigation', action: () => setActiveFile('projects.js') },
+    { label: 'Open Skills', detail: 'Open skills.json', group: 'Navigation', action: () => setActiveFile('skills.json') },
+    { label: 'Open Experience', detail: 'Open experience.ts', group: 'Navigation', action: () => setActiveFile('experience.ts') },
+    { label: 'Open Contact', detail: 'Open contact.css', group: 'Navigation', action: () => setActiveFile('contact.css') },
+    { label: 'Open GitHub Activity', detail: 'Open github.json', group: 'Navigation', action: () => setActiveFile('github.json') },
+    { label: 'Open SQL Playground', detail: 'Open query.sql', group: 'Navigation', action: () => setActiveFile('query.sql') },
+    { label: 'Open Resume', detail: 'Open resume.pdf', group: 'Navigation', action: () => setActiveFile('resume.pdf') },
+    { label: 'Open Certificates', detail: 'Open certificates.json', group: 'Navigation', action: () => setActiveFile('certificates.json') },
+    { label: 'Open README', detail: 'Open README.md', group: 'Navigation', action: () => setActiveFile('README.md') },
+    { label: 'Show Explorer', detail: 'Switch activity panel to Explorer', group: 'View', action: () => setActiveSidebar('explorer') },
+    { label: 'Show Search', detail: 'Switch activity panel to Search', group: 'View', action: () => setActiveSidebar('search') },
+    { label: 'Show Source Control', detail: 'Switch activity panel to Source Control', group: 'View', action: () => setActiveSidebar('source-control') },
+    { label: 'Show Extensions', detail: 'Switch activity panel to Extensions', group: 'View', action: () => setActiveSidebar('extensions') },
+    { label: 'Toggle Portfolio Assistant', detail: 'Show or hide the assistant panel', group: 'View', action: () => setAssistantOpen((current) => !current) },
+    { label: 'Toggle Integrated Terminal', detail: 'Open or close the simulated terminal', group: 'Terminal', action: () => setTerminalOpen((current) => !current) },
+  ]
+
+  const filteredPaletteCommands = paletteCommands.filter((command) =>
+    `${command.label} ${command.detail} ${command.group}`.toLowerCase().includes(commandQuery.trim().toLowerCase())
+  )
+
+  useEffect(() => {
+    setSelectedCommandIndex(0)
+  }, [commandQuery, commandPaletteOpen])
+
+  useEffect(() => {
+    if (!commandPaletteOpen) return
+    const frame = window.requestAnimationFrame(() => commandInputRef.current?.focus())
+    return () => window.cancelAnimationFrame(frame)
+  }, [commandPaletteOpen])
+
+  useEffect(() => {
+    if (!terminalOpen) return
+    const frame = window.requestAnimationFrame(() => terminalInputRef.current?.focus())
+    return () => window.cancelAnimationFrame(frame)
+  }, [terminalOpen])
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (event) => {
+      const key = event.key.toLowerCase()
+      const isModifier = event.ctrlKey || event.metaKey
+      const target = event.target
+      const isTyping = target instanceof HTMLElement && (
+        target.isContentEditable ||
+        ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName)
+      )
+
+      if (event.key === 'Escape') {
+        if (commandPaletteOpen) {
+          setCommandPaletteOpen(false)
+          setCommandQuery('')
+        } else if (terminalOpen) {
+          setTerminalOpen(false)
+        }
+        return
+      }
+
+      if (!isModifier || isTyping) return
+
+      if (key === 'p') {
+        event.preventDefault()
+        setCommandPaletteOpen(true)
+        setCommandQuery('')
+      } else if (event.code === 'Backquote' || key === '`') {
+        event.preventDefault()
+        setTerminalOpen((current) => !current)
+      } else if (key === 'a' && event.shiftKey) {
+        event.preventDefault()
+        setAssistantOpen((current) => !current)
+      }
+    }
+
+    window.addEventListener('keydown', handleGlobalKeyDown)
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown)
+  }, [commandPaletteOpen, terminalOpen])
+
   const handleChatSubmit = (event) => {
     event.preventDefault()
     sendMessage()
@@ -1821,9 +1983,19 @@ useEffect(() => {
           <span className="window-dot green" />
         </div>
 
-        <div className="command-search">
+        <button
+          type="button"
+          className="command-search command-search-trigger"
+          onClick={() => {
+            setCommandPaletteOpen(true)
+            setCommandQuery('')
+          }}
+          aria-label="Open Command Palette"
+          title="Open Command Palette (Ctrl+P)"
+        >
           <span>⌕</span> aditya-thube : portfolio
-        </div>
+          <kbd>Ctrl P</kbd>
+        </button>
 
         <button
           className="assistant-toggle"
@@ -1842,7 +2014,7 @@ useEffect(() => {
           <span>View</span>
           <span>Go</span>
           <span>Run</span>
-          <span>Terminal</span>
+          <button type="button" className="menu-item-button" onClick={() => setTerminalOpen((current) => !current)} aria-label="Toggle Interactive Terminal" aria-expanded={terminalOpen} title="Open Interactive Terminal (Ctrl+Backtick)">Terminal</button>
           <span>Help</span>
         </div>
         <span className="copilot-label">✦ Portfolio Assistant</span>
@@ -2488,7 +2660,7 @@ useEffect(() => {
           ) : activeFile === 'experience.ts' ? (
             <ExperienceSection />
           ) : activeFile === 'contact.css' ? (
-            <ContactSection />
+            <ContactSection notify={notify} />
           ) : activeFile === 'README.md' ? (
             <ReadmeSection />
           ) : (
@@ -2607,6 +2779,43 @@ useEffect(() => {
             <span>◈ {page.label}</span>
             <span>React · JavaScript</span>
           </div>
+          {terminalOpen && (
+            <section className="portfolio-terminal" aria-label="Interactive portfolio terminal">
+              <div className="portfolio-terminal-header">
+                <div className="portfolio-terminal-tabs">
+                  <span className="terminal-tab-active">TERMINAL</span>
+                  <span>OUTPUT</span>
+                  <span>DEBUG CONSOLE</span>
+                </div>
+                <button type="button" onClick={() => setTerminalOpen(false)} aria-label="Close terminal" title="Close terminal">×</button>
+              </div>
+              <div className="portfolio-terminal-output" aria-live="polite">
+                {terminalHistory.map((line, index) => (
+                  <div className={`terminal-line terminal-${line.type}`} key={`${index}-${line.text}`}>
+                    {line.text}
+                  </div>
+                ))}
+              </div>
+              <form
+                className="portfolio-terminal-form"
+                onSubmit={(event) => {
+                  event.preventDefault()
+                  runTerminalCommand(terminalInput)
+                }}
+              >
+                <span>visitor@aditya-portfolio:~$</span>
+                <input
+                  ref={terminalInputRef}
+                  value={terminalInput}
+                  onChange={(event) => setTerminalInput(event.target.value)}
+                  placeholder="Type help and press Enter"
+                  aria-label="Terminal command"
+                  autoComplete="off"
+                  spellCheck="false"
+                />
+              </form>
+            </section>
+          )}
         </main>
 
         {/* Right assistant panel */}
@@ -2747,6 +2956,83 @@ useEffect(() => {
           </aside>
           </>
         )}
+      </div>
+
+      {commandPaletteOpen && (
+        <div
+          className="command-palette-backdrop"
+          role="presentation"
+          onMouseDown={(event) => {
+            if (event.target === event.currentTarget) {
+              setCommandPaletteOpen(false)
+              setCommandQuery('')
+            }
+          }}
+        >
+          <section className="command-palette" role="dialog" aria-modal="true" aria-label="Command Palette">
+            <div className="command-palette-search">
+              <span aria-hidden="true">⌕</span>
+              <input
+                ref={commandInputRef}
+                value={commandQuery}
+                onChange={(event) => setCommandQuery(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === 'ArrowDown') {
+                    event.preventDefault()
+                    setSelectedCommandIndex((current) => Math.min(current + 1, filteredPaletteCommands.length - 1))
+                  } else if (event.key === 'ArrowUp') {
+                    event.preventDefault()
+                    setSelectedCommandIndex((current) => Math.max(current - 1, 0))
+                  } else if (event.key === 'Enter' && filteredPaletteCommands[selectedCommandIndex]) {
+                    event.preventDefault()
+                    executePaletteCommand(filteredPaletteCommands[selectedCommandIndex])
+                  }
+                }}
+                placeholder="Type a command or search..."
+                aria-label="Search commands"
+                autoComplete="off"
+              />
+              <kbd>ESC</kbd>
+            </div>
+            <div className="command-palette-list">
+              {filteredPaletteCommands.length ? filteredPaletteCommands.map((command) => (
+                <button
+                  type="button"
+                  key={command.label}
+                  className={`command-palette-item ${selectedCommandIndex === filteredPaletteCommands.indexOf(command) ? 'is-selected' : ''}`}
+                  onMouseEnter={() => setSelectedCommandIndex(filteredPaletteCommands.indexOf(command))}
+                  onClick={() => executePaletteCommand(command)}
+                >
+                  <span className="command-palette-item-icon">›</span>
+                  <span className="command-palette-item-copy">
+                    <strong>{command.label}</strong>
+                    <small>{command.detail}</small>
+                  </span>
+                  <span className="command-palette-group">{command.group}</span>
+                </button>
+              )) : (
+                <p className="command-palette-empty">No matching commands found.</p>
+              )}
+            </div>
+            <div className="command-palette-footer">
+              <span>↑↓ navigate</span>
+              <span>Enter to select</span>
+              <span>Ctrl + P · Palette</span><span>Ctrl + ` · Terminal</span><span>Ctrl + Shift + A · Assistant</span>
+            </div>
+          </section>
+        </div>
+      )}
+
+      <div className="portfolio-notifications" aria-live="polite" aria-atomic="false">
+        {notifications.map((notification) => (
+          <div className={`portfolio-toast toast-${notification.type}`} key={notification.id} role={notification.type === 'error' ? 'alert' : 'status'}>
+            <span className="toast-status-icon">
+              {notification.type === 'success' ? '✓' : notification.type === 'error' ? '!' : notification.type === 'warning' ? '⚠' : 'i'}
+            </span>
+            <span className="toast-message">{notification.message}</span>
+            <button type="button" onClick={() => setNotifications((current) => current.filter((item) => item.id !== notification.id))} aria-label="Dismiss notification">×</button>
+          </div>
+        ))}
       </div>
 
       {/* Status bar */}
