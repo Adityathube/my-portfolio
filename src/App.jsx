@@ -17,6 +17,7 @@ import { FaLinkedin } from 'react-icons/fa'
 import { VscFilePdf, VscFiles, VscSearch, VscSourceControl, VscExtensions, VscSettingsGear, VscClose, VscSparkle, VscSend } from 'react-icons/vsc'
 import './App.css'
 import './assistant-redesign.css'
+import SplitFlapText from './components/SplitFlapText'
 
 const FileIcon = ({ name, size = 16 }) => {
   const common = { size, 'aria-hidden': true }
@@ -1568,6 +1569,8 @@ function CustomCursor() {
 }
 
 function App() {
+  const [introVisible, setIntroVisible] = useState(true)
+  const [introLeaving, setIntroLeaving] = useState(false)
   const [activeFile, setActiveFile] = useState('home.jsx')
   const [assistantOpen, setAssistantOpen] = useState(true)
   const [commandPaletteOpen, setCommandPaletteOpen] = useState(false)
@@ -1650,6 +1653,26 @@ function App() {
   useEffect(() => {
   localStorage.setItem('portfolio-settings', JSON.stringify(settings))
   }, [settings])  
+
+  useEffect(() => {
+    if (!introVisible) return undefined
+    const introDuration = settings.reducedMotion ? 2200 : 6800
+    let exitTimer
+    const timer = window.setTimeout(() => {
+      setIntroLeaving(true)
+      exitTimer = window.setTimeout(() => setIntroVisible(false), 650)
+    }, introDuration)
+    return () => {
+      window.clearTimeout(timer)
+      window.clearTimeout(exitTimer)
+    }
+  }, [introVisible, settings.reducedMotion])
+
+  const enterPortfolio = () => {
+    setIntroLeaving(true)
+    window.setTimeout(() => setIntroVisible(false), 650)
+  }
+
   useEffect(() => {
   document.documentElement.dataset.theme = settings.theme
   document.documentElement.style.setProperty(
@@ -1974,6 +1997,54 @@ useEffect(() => {
 
   return (
     <div className="ide">
+      {introVisible && (
+        <div className={`portfolio-intro${introLeaving ? ' is-leaving' : ''}${settings.reducedMotion ? ' portfolio-intro-reduced' : ''}`} role="dialog" aria-modal="true" aria-label="Portfolio introduction">
+          <div className="portfolio-intro-grid" aria-hidden="true" />
+          <div className="portfolio-intro-content">
+            <div className="portfolio-intro-topline">
+              <span className="portfolio-intro-status"><span className="portfolio-intro-status-dot" /> SYSTEM ONLINE</span>
+              <span className="portfolio-intro-index">WELCOME / 2026</span>
+            </div>
+            <div className="portfolio-intro-kicker">PERSONAL DEVELOPER PORTFOLIO</div>
+            <h1 className="portfolio-intro-name">ADITYA THUBE</h1>
+            <div className="portfolio-intro-board-wrap">
+              <SplitFlapText
+                words={['BUILD WITH PURPOSE', 'DESIGN WITH DETAIL', 'SHIP WITH CONFIDENCE']}
+                flipDuration={0.14}
+                stagger={0.035}
+                cycleDelay={1500}
+                charset="alphanumeric"
+                flipsPerChar={3}
+                order="center"
+                align="center"
+                tileStyle="board"
+                tileColor="#171a16"
+                textColor="#f4c95d"
+                glare={0.12}
+                depth={0.65}
+                tileRadius={5}
+                gap={2}
+                fontSize="clamp(13px, 2.4vw, 25px)"
+                padTo={22}
+                intro
+                loop
+              />
+            </div>
+            <div className="portfolio-intro-bottom">
+              <div className="portfolio-intro-progress" aria-hidden="true"><span /></div>
+              <div className="portfolio-intro-meta">
+                <span>REACT · JAVASCRIPT · CREATIVE DEVELOPMENT</span>
+                <span>INITIALIZING WORKSPACE…</span>
+              </div>
+              <button type="button" className="portfolio-intro-enter" onClick={enterPortfolio}>
+                ENTER PORTFOLIO <span aria-hidden="true">↗</span>
+              </button>
+            </div>
+          </div>
+          <div className="portfolio-intro-corner portfolio-intro-corner-tl" aria-hidden="true">AT / 01</div>
+          <div className="portfolio-intro-corner portfolio-intro-corner-br" aria-hidden="true">DESIGNED & BUILT WITH CARE</div>
+        </div>
+      )}
       <CustomCursor/>
       {/* Application title bar */}
       <header className="app-titlebar">

@@ -7149,3 +7149,310 @@ body.is-panel-resizing * {
   z-index: 30;
   pointer-events: auto;
 }
+
+
+/* Portfolio opening screen — SplitFlapText intro */
+.portfolio-intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100000;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  isolation: isolate;
+  color: #f5f0df;
+  background:
+    radial-gradient(ellipse at 50% 42%, rgba(229, 165, 10, 0.105), transparent 42%),
+    radial-gradient(ellipse at 12% 88%, rgba(115, 126, 63, 0.11), transparent 38%),
+    #11120f;
+  animation: portfolio-intro-appear 500ms ease-out both;
+}
+
+.portfolio-intro::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.2;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0,
+    transparent 3px,
+    rgba(255, 255, 255, 0.025) 4px
+  );
+}
+
+.portfolio-intro-grid {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0.2;
+  background-image:
+    linear-gradient(rgba(229, 165, 10, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(229, 165, 10, 0.08) 1px, transparent 1px);
+  background-size: 58px 58px;
+  mask-image: linear-gradient(to bottom, transparent, black 18%, black 82%, transparent);
+}
+
+.portfolio-intro-content {
+  width: min(900px, calc(100% - 56px));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+  padding: 44px 0 52px;
+}
+
+.portfolio-intro-topline,
+.portfolio-intro-meta {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 18px;
+  color: rgba(238, 231, 209, 0.48);
+  font: 10px/1.5 "JetBrains Mono", "Cascadia Code", monospace;
+  letter-spacing: 0.13em;
+}
+
+.portfolio-intro-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: #b5bd68;
+}
+
+.portfolio-intro-status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #a6c36f;
+  box-shadow: 0 0 12px rgba(166, 195, 111, 0.8);
+  animation: portfolio-intro-pulse 1.5s ease-in-out infinite;
+}
+
+.portfolio-intro-kicker {
+  margin-top: clamp(66px, 12vh, 116px);
+  color: #e5a50a;
+  font: 600 10px/1.5 "JetBrains Mono", "Cascadia Code", monospace;
+  letter-spacing: 0.28em;
+}
+
+.portfolio-intro-name {
+  margin: 17px 0 31px;
+  color: #f3efdf;
+  font-family: "JetBrains Mono", "Cascadia Code", monospace;
+  font-size: clamp(32px, 7vw, 76px);
+  font-weight: 750;
+  line-height: 1.05;
+  letter-spacing: 0.075em;
+  text-shadow: 0 10px 38px rgba(0, 0, 0, 0.42);
+  animation: portfolio-intro-name-in 800ms 150ms cubic-bezier(.2,.75,.25,1) both;
+}
+
+.portfolio-intro-board-wrap {
+  width: 100%;
+  min-height: clamp(58px, 9vw, 88px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 15px 10px;
+  border-top: 1px solid rgba(229, 165, 10, 0.2);
+  border-bottom: 1px solid rgba(229, 165, 10, 0.2);
+  background: linear-gradient(90deg, transparent, rgba(229, 165, 10, 0.035), transparent);
+}
+
+.portfolio-intro-board-wrap .split-flap-text {
+  max-width: 100%;
+}
+
+.portfolio-intro-bottom {
+  width: 100%;
+  margin-top: clamp(44px, 8vh, 76px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.portfolio-intro-progress {
+  width: min(300px, 60%);
+  height: 2px;
+  overflow: hidden;
+  background: rgba(245, 240, 223, 0.13);
+}
+
+.portfolio-intro-progress span {
+  display: block;
+  width: 38%;
+  height: 100%;
+  background: #e5a50a;
+  box-shadow: 0 0 12px rgba(229, 165, 10, 0.7);
+  animation: portfolio-intro-progress 6.5s cubic-bezier(.6,0,.4,1) forwards;
+}
+
+.portfolio-intro-meta {
+  margin-top: 13px;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+}
+
+.portfolio-intro-enter {
+  margin-top: 31px;
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  padding: 11px 17px;
+  border: 1px solid rgba(229, 165, 10, 0.48);
+  border-radius: 4px;
+  color: #f2d58a;
+  background: rgba(229, 165, 10, 0.07);
+  font: 600 10px/1.2 "JetBrains Mono", "Cascadia Code", monospace;
+  letter-spacing: 0.13em;
+  cursor: pointer;
+  transition: color 180ms ease, background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.portfolio-intro-enter:hover {
+  color: #171811;
+  background: #e5a50a;
+  border-color: #e5a50a;
+  transform: translateY(-2px);
+}
+
+.portfolio-intro-enter span {
+  font-size: 15px;
+  line-height: 0.8;
+}
+
+.portfolio-intro-corner {
+  position: absolute;
+  color: rgba(238, 231, 209, 0.3);
+  font: 9px/1.4 "JetBrains Mono", "Cascadia Code", monospace;
+  letter-spacing: 0.14em;
+}
+
+.portfolio-intro-corner-tl {
+  top: 25px;
+  left: 28px;
+}
+
+.portfolio-intro-corner-br {
+  right: 28px;
+  bottom: 25px;
+}
+
+@keyframes portfolio-intro-appear {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes portfolio-intro-name-in {
+  from { opacity: 0; transform: translateY(14px); filter: blur(5px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes portfolio-intro-progress {
+  from { transform: translateX(-110%); }
+  to { transform: translateX(265%); }
+}
+
+@keyframes portfolio-intro-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.35; }
+}
+
+@media (max-width: 600px) {
+  .portfolio-intro-content {
+    width: calc(100% - 34px);
+    padding: 30px 0 38px;
+  }
+
+  .portfolio-intro-topline {
+    font-size: 8px;
+    letter-spacing: 0.07em;
+  }
+
+  .portfolio-intro-kicker {
+    margin-top: 78px;
+    font-size: 8px;
+    letter-spacing: 0.18em;
+  }
+
+  .portfolio-intro-name {
+    font-size: clamp(29px, 9vw, 48px);
+    letter-spacing: 0.035em;
+    margin-bottom: 25px;
+  }
+
+  .portfolio-intro-board-wrap {
+    overflow: hidden;
+    padding: 12px 3px;
+  }
+
+  .portfolio-intro-board-wrap .split-flap-text {
+    transform: scale(0.78);
+    transform-origin: center;
+  }
+
+  .portfolio-intro-meta {
+    flex-direction: column;
+    gap: 5px;
+    font-size: 7px;
+    text-align: center;
+  }
+
+  .portfolio-intro-corner-tl {
+    top: 14px;
+    left: 16px;
+    font-size: 8px;
+  }
+
+  .portfolio-intro-corner-br {
+    right: 16px;
+    bottom: 14px;
+    font-size: 7px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-intro,
+  .portfolio-intro-name,
+  .portfolio-intro-status-dot,
+  .portfolio-intro-progress span {
+    animation: none !important;
+  }
+
+  .portfolio-intro-enter {
+    transition: none;
+  }
+}
+
+.reduce-motion .portfolio-intro,
+.reduce-motion .portfolio-intro * {
+  animation-duration: 0.01ms !important;
+  animation-iteration-count: 1 !important;
+  scroll-behavior: auto !important;
+}
+
+.portfolio-intro.is-leaving {
+  pointer-events: none;
+  animation: portfolio-intro-exit 650ms cubic-bezier(.65, 0, .35, 1) forwards;
+}
+
+@keyframes portfolio-intro-exit {
+  to { opacity: 0; visibility: hidden; }
+}
+
+.reduce-motion .portfolio-intro.is-leaving {
+  animation-duration: 1ms !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-intro.is-leaving {
+    animation-duration: 1ms !important;
+  }
+}
